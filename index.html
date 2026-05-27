@@ -3,152 +3,363 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>American English Pronunciation Scorer</title>
+    <title>SAMIDOT - Luyện Phát Âm Tiếng Anh</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #4a69bd;
+            --success: #2ed573;
+            --warning: #ffa502;
+            --danger: #ff4757;
+            --bg-color: #f1f2f6;
+            --card-bg: #ffffff;
+            --text-main: #2f3542;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Nunito', sans-serif;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
+            background-color: var(--bg-color);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            overflow-x: hidden;
         }
-        .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
-        }
-        h2 { color: #2c3e50; }
-        .target-text {
-            font-size: 24px;
-            font-weight: bold;
-            color: #34495e;
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #e8f4f8;
-            border-radius: 8px;
-        }
-        .btn-speak {
-            background-color: #e74c3c;
+
+        /* Top Bar: Điểm thưởng */
+        .top-bar {
+            position: absolute;
+            top: 20px;
+            background: linear-gradient(135deg, #fbc531, #e1b12c);
+            padding: 10px 25px;
+            border-radius: 30px;
             color: white;
+            font-weight: 800;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(24bc, 197, 49, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .category-badge {
+            background-color: #eccc68;
+            color: #2f3542;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .target-text {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 10px 0 30px;
+            line-height: 1.4;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
             border: none;
-            padding: 12px 25px;
-            font-size: 16px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 800;
             border-radius: 50px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .btn-speak:hover { background-color: #c0392b; }
+
+        .btn-speak {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(74, 105, 189, 0.4);
+        }
+
+        .btn-speak:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(74, 105, 189, 0.6);
+        }
+
         .btn-speak.listening {
-            background-color: #2ecc71;
+            background-color: var(--danger);
             animation: pulse 1.5s infinite;
         }
-        .result-box { margin-top: 25px; }
-        .score {
-            font-size: 36px;
-            font-weight: bold;
-            color: #27ae60;
-            margin-bottom: 10px;
+
+        .btn-next {
+            background-color: #dfe4ea;
+            color: var(--text-main);
         }
-        .transcript {
-            color: #7f8c8d;
-            font-style: italic;
+
+        .btn-next:hover {
+            background-color: #ced6e0;
         }
+
+        .result-box {
+            background-color: #f8f9fa;
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px dashed #ced6e0;
+        }
+
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0 auto 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            color: #a4b0be;
+        }
+
+        .feedback-text {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-top: 15px;
+        }
+
+        /* Highlight màu cho từng từ */
+        .word {
+            display: inline-block;
+            margin: 0 3px;
+            padding: 2px 5px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        .word.correct { color: var(--success); font-weight: 800; background-color: #e8f8f5; }
+        .word.incorrect { color: var(--danger); text-decoration: underline; background-color: #fdedec;}
+
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(255, 71, 87, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+        }
+
+        /* Hiệu ứng Pháo giấy (Confetti) */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            top: -10px;
+            z-index: 9999;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Pronunciation Practice</h2>
-    <p>Hãy đọc to câu tiếng Anh dưới đây (Chuẩn Anh-Mỹ):</p>
-    
-    <div class="target-text" id="targetText">Education is the most powerful weapon.</div>
-    
-    <button class="btn-speak" id="btnSpeak">🎤 Nhấn để nói</button>
-    
-    <div class="result-box">
-        <div class="score" id="scoreDisplay">0%</div>
-        <div class="transcript" id="transcriptDisplay">Kết quả nhận diện sẽ hiện ở đây...</div>
+    <!-- Điểm thưởng -->
+    <div class="top-bar">
+        ⭐ Điểm tích lũy: <span id="totalPoints">0</span>
     </div>
-</div>
+
+    <div class="container">
+        <div class="category-badge" id="categoryDisplay">Khởi động</div>
+        <div class="target-text" id="targetText">Loading...</div>
+        
+        <div class="controls">
+            <button class="btn-speak" id="btnSpeak">🎤 Nhấn để nói</button>
+            <button class="btn-next" id="btnNext">⏭️ Câu tiếp theo</button>
+        </div>
+        
+        <div class="result-box">
+            <div class="score-circle" id="scoreDisplay">0%</div>
+            <div id="statusText" style="color: #747d8c; font-weight: 600;">Sẵn sàng lắng nghe...</div>
+            <div class="feedback-text" id="feedbackDisplay"></div>
+        </div>
+    </div>
 
 <script>
-    // Kiểm tra xem trình duyệt có hỗ trợ Web Speech API không
+    // 1. DATA CORE: Kho dữ liệu các câu thực hành
+    const dataCore = [
+        { category: "Khởi động", text: "Hello, how are you today?" },
+        { category: "Khởi động", text: "I love learning new things." },
+        { category: "Phân biệt /i:/ và /ɪ/", text: "The sheep is on the ship." },
+        { category: "Phân biệt /s/ và /ʃ/", text: "She sells seashells by the seashore." },
+        { category: "Âm cuối (Ending sounds)", text: "I worked hard and passed the test." },
+        { category: "Giao tiếp hàng ngày", text: "Could you please repeat that?" },
+        { category: "Giao tiếp hàng ngày", text: "I would like a cup of coffee." },
+        { category: "IELTS Speaking - Part 1", text: "I usually spend my free time reading books." },
+        { category: "IELTS Speaking - Nâng cao", text: "Education is the most powerful weapon to change the world." },
+        { category: "IELTS Speaking - Nâng cao", text: "Technology has significantly transformed our daily lives." }
+    ];
+
+    // 2. BIẾN TOÀN CỤC
+    let currentSentenceIndex = 0;
+    let totalPoints = 0;
+    
+    const targetTextElement = document.getElementById('targetText');
+    const categoryDisplay = document.getElementById('categoryDisplay');
+    const btnSpeak = document.getElementById('btnSpeak');
+    const btnNext = document.getElementById('btnNext');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const statusText = document.getElementById('statusText');
+    const feedbackDisplay = document.getElementById('feedbackDisplay');
+    const totalPointsDisplay = document.getElementById('totalPoints');
+
+    // 3. HÀM LOAD CÂU MỚI
+    function loadNextSentence() {
+        // Lấy ngẫu nhiên một câu trong data core
+        const randomIndex = Math.floor(Math.random() * dataCore.length);
+        const item = dataCore[randomIndex];
+        
+        categoryDisplay.textContent = item.category;
+        targetTextElement.textContent = item.text;
+        
+        // Reset giao diện
+        scoreDisplay.textContent = "0%";
+        scoreDisplay.style.color = "#a4b0be";
+        feedbackDisplay.innerHTML = "";
+        statusText.textContent = "Sẵn sàng lắng nghe...";
+        btnSpeak.textContent = "🎤 Nhấn để nói";
+    }
+
+    // Khởi tạo câu đầu tiên khi mở trang
+    loadNextSentence();
+    btnNext.addEventListener('click', loadNextSentence);
+
+    // 4. CẤU HÌNH WEB SPEECH API
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
-        alert("Trình duyệt của bạn không hỗ trợ Web Speech API. Vui lòng sử dụng Google Chrome.");
+        alert("Trình duyệt không hỗ trợ Web Speech API. Vui lòng dùng Google Chrome trên máy tính hoặc Android.");
     } else {
         const recognition = new SpeechRecognition();
-        // Cài đặt chuẩn Anh-Mỹ
-        recognition.lang = 'en-US';
+        recognition.lang = 'en-US'; // Chuẩn Anh Mỹ
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
 
-        const btnSpeak = document.getElementById('btnSpeak');
-        const targetTextElement = document.getElementById('targetText');
-        const scoreDisplay = document.getElementById('scoreDisplay');
-        const transcriptDisplay = document.getElementById('transcriptDisplay');
-
         btnSpeak.addEventListener('click', () => {
             recognition.start();
-            btnSpeak.textContent = "Đang lắng nghe...";
+            btnSpeak.textContent = "Đang nghe...";
             btnSpeak.classList.add('listening');
-            transcriptDisplay.textContent = "...";
-            scoreDisplay.textContent = "- %";
+            statusText.textContent = "Hãy đọc to câu phía trên...";
+            feedbackDisplay.innerHTML = "";
         });
 
         recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript.toLowerCase().replace(/[.,!?]/g, '');
-            const targetText = targetTextElement.textContent.toLowerCase().replace(/[.,!?]/g, '');
+            const transcript = event.results[0][0].transcript.toLowerCase();
+            const targetText = targetTextElement.textContent.toLowerCase();
             
-            transcriptDisplay.textContent = `Bạn đã đọc: "${transcript}"`;
+            // Xử lý chuỗi: bỏ dấu câu để so sánh chính xác
+            const cleanTranscript = transcript.replace(/[.,!?]/g, '');
+            const cleanTarget = targetText.replace(/[.,!?]/g, '');
 
-            // Logic tính điểm cơ bản: So sánh từng từ
-            const targetWords = targetText.split(' ');
-            const spokenWords = transcript.split(' ');
+            const spokenWords = cleanTranscript.split(' ');
+            const targetWords = cleanTarget.split(' ');
             
             let matchCount = 0;
+            let resultHTML = "";
+
+            // 5. LOGIC SO SÁNH VÀ HIGHLIGHT TỪNG TỪ
             targetWords.forEach(word => {
                 if (spokenWords.includes(word)) {
                     matchCount++;
+                    // Bôi xanh từ đọc đúng
+                    resultHTML += `<span class="word correct">${word}</span>`;
+                } else {
+                    // Bôi đỏ từ đọc sai / thiếu
+                    resultHTML += `<span class="word incorrect">${word}</span>`;
                 }
             });
 
+            // Tính điểm %
             const score = Math.round((matchCount / targetWords.length) * 100);
             scoreDisplay.textContent = `${score}%`;
-            
-            // Đổi màu điểm số dựa trên kết quả
+            feedbackDisplay.innerHTML = resultHTML;
+            statusText.textContent = `Máy nghe được: "${transcript}"`;
+
+            // 6. CƠ CHẾ ĐIỂM THƯỞNG & HIỆU ỨNG
             if (score >= 80) {
-                scoreDisplay.style.color = '#27ae60'; // Xanh lá
+                scoreDisplay.style.color = 'var(--success)';
+                totalPoints += 10; // Cộng 10 điểm
+                fireConfetti();    // Bắn pháo giấy
             } else if (score >= 50) {
-                scoreDisplay.style.color = '#f39c12'; // Vàng cam
+                scoreDisplay.style.color = 'var(--warning)';
+                totalPoints += 5;  // Cộng 5 điểm
             } else {
-                scoreDisplay.style.color = '#e74c3c'; // Đỏ
+                scoreDisplay.style.color = 'var(--danger)';
             }
+            
+            // Cập nhật điểm lên UI
+            totalPointsDisplay.textContent = totalPoints;
         };
 
         recognition.onspeechend = () => {
             recognition.stop();
-            btnSpeak.textContent = "🎤 Nhấn để nói lại";
+            btnSpeak.textContent = "🎤 Đọc lại";
             btnSpeak.classList.remove('listening');
         };
 
         recognition.onerror = (event) => {
-            transcriptDisplay.textContent = `Lỗi nhận diện: ${event.error}`;
+            statusText.textContent = `Lỗi: Không nghe rõ (${event.error})`;
             btnSpeak.textContent = "🎤 Thử lại";
             btnSpeak.classList.remove('listening');
         };
+    }
+
+    // 7. HÀM TẠO HIỆU ỨNG PHÁO GIẤY CHÚC MỪNG
+    function fireConfetti() {
+        const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#ff6348', '#ff7f50', '#2ed573'];
+        for(let i = 0; i < 70; i++) {
+            let conf = document.createElement('div');
+            conf.classList.add('confetti');
+            // Random vị trí xuất hiện ngang
+            conf.style.left = Math.random() * 100 + 'vw';
+            // Random màu sắc
+            conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            // Random tốc độ rơi
+            conf.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            // Random kích thước pháo
+            conf.style.width = Math.random() * 10 + 5 + 'px';
+            conf.style.height = conf.style.width;
+            
+            document.body.appendChild(conf);
+
+            // Dọn dẹp DOM sau khi pháo rơi xong (5 giây)
+            setTimeout(() => {
+                conf.remove();
+            }, 5000);
+        }
     }
 </script>
 
