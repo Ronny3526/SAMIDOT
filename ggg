@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>American English Pronunciation Scorer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h2 { color: #2c3e50; }
+        .target-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #34495e;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e8f4f8;
+            border-radius: 8px;
+        }
+        .btn-speak {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-speak:hover { background-color: #c0392b; }
+        .btn-speak.listening {
+            background-color: #2ecc71;
+            animation: pulse 1.5s infinite;
+        }
+        .result-box { margin-top: 25px; }
+        .score {
+            font-size: 36px;
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+        .transcript {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Pronunciation Practice</h2>
+    <p>Hãy đọc to câu tiếng Anh dưới đây (Chuẩn Anh-Mỹ):</p>
+    
+    <div class="target-text" id="targetText">Education is the most powerful weapon.</div>
+    
+    <button class="btn-speak" id="btnSpeak">🎤 Nhấn để nói</button>
+    
+    <div class="result-box">
+        <div class="score" id="scoreDisplay">0%</div>
+        <div class="transcript" id="transcriptDisplay">Kết quả nhận diện sẽ hiện ở đây...</div>
+    </div>
+</div>
+
+<script>
+    // Kiểm tra xem trình duyệt có hỗ trợ Web Speech API không
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+        alert("Trình duyệt của bạn không hỗ trợ Web Speech API. Vui lòng sử dụng Google Chrome.");
+    } else {
+        const recognition = new SpeechRecognition();
+        // Cài đặt chuẩn Anh-Mỹ
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        const btnSpeak = document.getElementById('btnSpeak');
+        const targetTextElement = document.getElementById('targetText');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const transcriptDisplay = document.getElementById('transcriptDisplay');
+
+        btnSpeak.addEventListener('click', () => {
+            recognition.start();
+            btnSpeak.textContent = "Đang lắng nghe...";
+            btnSpeak.classList.add('listening');
+            transcriptDisplay.textContent = "...";
+            scoreDisplay.textContent = "- %";
+        });
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript.toLowerCase().replace(/[.,!?]/g, '');
+            const targetText = targetTextElement.textContent.toLowerCase().replace(/[.,!?]/g, '');
+            
+            transcriptDisplay.textContent = `Bạn đã đọc: "${transcript}"`;
+
+            // Logic tính điểm cơ bản: So sánh từng từ
+            const targetWords = targetText.split(' ');
+            const spokenWords = transcript.split(' ');
+            
+            let matchCount = 0;
+            targetWords.forEach(word => {
+                if (spokenWords.includes(word)) {
+                    matchCount++;
+                }
+            });
+
+            const score = Math.round((matchCount / targetWords.length) * 100);
+            scoreDisplay.textContent = `${score}%`;
+            
+            // Đổi màu điểm số dựa trên kết quả
+            if (score >= 80) {
+                scoreDisplay.style.color = '#27ae60'; // Xanh lá
+            } else if (score >= 50) {
+                scoreDisplay.style.color = '#f39c12'; // Vàng cam
+            } else {
+                scoreDisplay.style.color = '#e74c3c'; // Đỏ
+            }
+        };
+
+        recognition.onspeechend = () => {
+            recognition.stop();
+            btnSpeak.textContent = "🎤 Nhấn để nói lại";
+            btnSpeak.classList.remove('listening');
+        };
+
+        recognition.onerror = (event) => {
+            transcriptDisplay.textContent = `Lỗi nhận diện: ${event.error}`;
+            btnSpeak.textContent = "🎤 Thử lại";
+            btnSpeak.classList.remove('listening');
+        };
+    }
+</script>
+
+</body>
+</html>
